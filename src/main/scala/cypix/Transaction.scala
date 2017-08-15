@@ -5,20 +5,21 @@ import java.util.Currency
 
 import scala.math.BigDecimal.RoundingMode
 
-import Hasher._
+import Utils._
 
-case class TransactionRequest(url: String, secret: String, serviceId: String, orderId: String,
-                              paymentMethod: PaymentMethod, sum: BigDecimal, currency: Currency,
-                              msisdn: Option[String] = Option.empty, description: Option[String] = Option.empty) {
+case class TransactionRequest(secret: String, serviceId: String, orderId: String,
+                              paymentMethod: PaymentMethod, sum: BigDecimal,
+                              currency: Currency = Currency.getInstance("RUB"),
+                              msisdn: Option[String] = None, description: Option[String] = None) {
 
-  sum.setScale(2, RoundingMode.HALF_UP)
+  private val sumRounded = sum.setScale(2, RoundingMode.HALF_UP)
   def pack(): String = {
-      val q = serviceId + orderId + paymentMethod.id + sum + currency + msisdn.getOrElse("") +
-        description.getOrElse("") + secret
-      s"https://api.cypix.ru/transaction/?service_id=$serviceId&order_id=$orderId&summ=$sum&currency=$currency" +
+      val q = serviceId + orderId + paymentMethod.id + sumRounded + currency + msisdn.getOrElse("") +
+              description.getOrElse("") + secret
+      s"https://api.cypix.ru/transaction/?service_id=$serviceId&order_id=$orderId&summ=$sumRounded&currency=$currency" +
         s"&payment_method_id=${paymentMethod.id}" +
-        msisdn.map(_ => s"&msisdn=${_}").getOrElse("") +
-        description.map(_ => s"&description=${_}").getOrElse("") +
+        msisdn.map(m => s"&msisdn=$m").getOrElse("") +
+        description.map(d => s"&description=$d").getOrElse("") +
         s"&hash=${hash(q)}"
   }
 }
