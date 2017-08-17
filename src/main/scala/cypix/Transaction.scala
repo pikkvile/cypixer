@@ -1,11 +1,11 @@
 package cypix
 
-import java.text.ParseException
 import java.util.Currency
 
 import scala.math.BigDecimal.RoundingMode
-
+import org.json4s.native.JsonMethods.parse
 import Utils._
+import org.json4s.DefaultFormats
 
 case class TransactionRequest(secret: String, serviceId: String, orderId: String,
                               paymentMethod: PaymentMethod, sum: BigDecimal,
@@ -24,8 +24,10 @@ case class TransactionRequest(secret: String, serviceId: String, orderId: String
   }
 }
 
-case class TransactionResponse(processingStatus: String, errorCode: Int, location: Option[String],
+case class TransactionResponse(processingStatus: String, errorCode: String, location: Option[String],
                                transactionId: Option[String])
 object TransactionResponse {
-  def unpack(payload: String): Either[ParseException, TransactionResponse] = ???
+  implicit val formats = DefaultFormats
+  def unpack(payload: String): TransactionResponse =
+    parse(payload).camelizeKeys.extract[TransactionResponse]
 }
