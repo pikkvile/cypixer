@@ -4,11 +4,11 @@ import org.json4s.DefaultFormats
 import org.json4s.native.JsonMethods.parse
 
 case class OperatorLookupRequest(serviceId: String, secret: String, msisdn: String) {
-  def pack(request: OperatorLookupRequest): String =
+  def pack(): String =
     s"https://api.cypix.ru/operator/?service_id=$serviceId&secret=$secret&msisdn=$msisdn"
 }
 
-case class OperatorLookupResponse(operator: String)
+case class OperatorLookupResponse(operatorName: String)
 object OperatorLookupResponse {
   implicit val formats = DefaultFormats
   def unpack(payload: String): OperatorLookupResponse = {
